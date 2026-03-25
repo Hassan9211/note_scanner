@@ -1,29 +1,42 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:note_scanner/main.dart';
+import 'package:note_scanner/scan_models.dart';
 
 void main() {
-  testWidgets('shows the empty camera state', (WidgetTester tester) async {
-    await tester.pumpWidget(const NoteScannerApp(cameras: []));
-    await tester.pump();
-
-    expect(find.text('Currency Note Checker'), findsOneWidget);
-    expect(find.text('Camera not available'), findsOneWidget);
-    expect(find.text('No camera found on this device.'), findsOneWidget);
-
-    final scanButton = tester.widget<ElevatedButton>(
-      find.byType(ElevatedButton),
+  test('serializes note scan results with confidence labels', () {
+    final result = NoteScanResult(
+      verdict: 'Likely Real',
+      summary: 'Strong OCR and image-quality matches were found.',
+      confidence: 0.92,
+      capturedImagePath: 'capture.jpg',
+      processedImagePath: 'crop.jpg',
+      extractedText: 'STATE BANK 500',
+      detectedFeatures: [
+        ScanFeature(
+          title: 'Authority text',
+          detail: 'Issuer wording was detected.',
+          passed: true,
+        ),
+      ],
+      warnings: ['Preliminary mobile scan only.'],
+      scannedAt: DateTime(2026, 3, 25),
+      quality: ScanQualityMetrics(
+        lighting: 0.8,
+        contrast: 0.7,
+        sharpness: 0.9,
+        uvResponse: 0.22,
+      ),
+      ocrAvailable: true,
+      detectionMode: 'OCR + image processing',
+      inspectionMode: ScanInspectionMode.standard,
     );
-    expect(scanButton.onPressed, isNull);
 
-    await tester.pumpWidget(const SizedBox.shrink());
+    expect(result.confidenceLabel, '92% confidence');
+
+    final restored = NoteScanResult.fromJson(result.toJson());
+    expect(restored.verdict, 'Likely Real');
+    expect(restored.detectedFeatures.single.passed, isTrue);
+    expect(restored.quality.sharpness, 0.9);
+    expect(restored.inspectionMode, ScanInspectionMode.standard);
   });
 }
