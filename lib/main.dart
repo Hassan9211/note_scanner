@@ -95,7 +95,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
         _historyStore = store;
         _history = history;
         _latestResult = history.isNotEmpty ? history.first : null;
-        _lastCapturePath = history.isNotEmpty ? history.first.capturedImagePath : null;
+        _lastCapturePath = history.isNotEmpty
+            ? history.first.capturedImagePath
+            : null;
         _inspectionMode = history.isNotEmpty
             ? history.first.inspectionMode
             : ScanInspectionMode.standard;
@@ -228,14 +230,17 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
 
     final nextFlashOn = !_isFlashOn;
     try {
-      await controller.setFlashMode(nextFlashOn ? FlashMode.torch : FlashMode.off);
+      await controller.setFlashMode(
+        nextFlashOn ? FlashMode.torch : FlashMode.off,
+      );
       if (!mounted) {
         return;
       }
       setState(() {
         _isFlashOn = nextFlashOn;
-        _helperText =
-            nextFlashOn ? 'Flash enabled for low-light scanning.' : 'Flash disabled.';
+        _helperText = nextFlashOn
+            ? 'Flash enabled for low-light scanning.'
+            : 'Flash disabled.';
       });
     } on CameraException {
       if (!mounted) {
@@ -282,7 +287,10 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
   Future<void> _captureAndAnalyze() async {
     final controller = _controller;
     final historyStore = _historyStore;
-    if (!_isCameraReady || _isBusy || controller == null || historyStore == null) {
+    if (!_isCameraReady ||
+        _isBusy ||
+        controller == null ||
+        historyStore == null) {
       return;
     }
 
@@ -343,7 +351,8 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
       }
       setState(() {
         _status = 'Capture failed';
-        _helperText = error.description ?? 'The camera could not take a picture.';
+        _helperText =
+            error.description ?? 'The camera could not take a picture.';
       });
     } catch (error) {
       if (!mounted) {
@@ -368,9 +377,7 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
     try {
       await _scanSoundPlayer.stop();
       await _scanSoundPlayer.setVolume(result.confidence >= 0.7 ? 1.0 : 0.82);
-      await _scanSoundPlayer.play(
-        AssetSource('audio/scan_beep.wav'),
-      );
+      await _scanSoundPlayer.play(AssetSource('audio/scan_beep.wav'));
     } catch (_) {
       await SystemSound.play(
         result.confidence >= 0.7
@@ -426,11 +433,13 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(22),
                   ),
-                  tileColor: Theme.of(context)
-                      .colorScheme
-                      .surfaceContainerHighest
-                      .withValues(alpha: 0.35),
-                  leading: _HistoryThumb(path: item.capturedImagePath, size: 56),
+                  tileColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                  leading: _HistoryThumb(
+                    path: item.capturedImagePath,
+                    size: 56,
+                  ),
                   title: Text(item.verdict),
                   subtitle: Text(
                     '${item.confidenceLabel} - ${_formatTimestamp(item.scannedAt)}',
@@ -495,7 +504,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                             ),
                             child: Center(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 28),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 28,
+                                ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -504,42 +515,55 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                           ? Icons.document_scanner
                                           : Icons.no_photography,
                                       size: 52,
-                                      color: Colors.white.withValues(alpha: 0.82),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.82,
+                                      ),
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
                                       _status,
                                       textAlign: TextAlign.center,
-                                      style: theme.textTheme.titleLarge?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+                                      style: theme.textTheme.titleLarge
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
                                       _helperText,
                                       textAlign: TextAlign.center,
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: Colors.white.withValues(alpha: 0.82),
-                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.82,
+                                            ),
+                                          ),
                                     ),
                                     const SizedBox(height: 18),
                                     if (_isInitializing)
                                       const SizedBox(
                                         width: 32,
                                         height: 32,
-                                        child: CircularProgressIndicator(strokeWidth: 3),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 3,
+                                        ),
                                       )
                                     else if (permissionBlocked)
                                       FilledButton.icon(
                                         onPressed: openAppSettings,
-                                        icon: const Icon(Icons.settings_outlined),
+                                        icon: const Icon(
+                                          Icons.settings_outlined,
+                                        ),
                                         label: const Text('Open Settings'),
                                       )
                                     else
                                       FilledButton.icon(
-                                        onPressed: _ensurePermissionAndStartCamera,
-                                        icon: const Icon(Icons.camera_alt_outlined),
+                                        onPressed:
+                                            _ensurePermissionAndStartCamera,
+                                        icon: const Icon(
+                                          Icons.camera_alt_outlined,
+                                        ),
                                         label: Text(
                                           permissionGranted
                                               ? 'Retry Camera'
@@ -553,7 +577,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                           ),
                         Positioned.fill(
                           child: IgnorePointer(
-                            child: CustomPaint(painter: _FramePainter(isBusy: _isBusy)),
+                            child: CustomPaint(
+                              painter: _FramePainter(isBusy: _isBusy),
+                            ),
                           ),
                         ),
                         if (_isCameraReady)
@@ -601,7 +627,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                               ),
                               const SizedBox(width: 12),
                               IconButton.filledTonal(
-                                onPressed: _history.isEmpty ? null : _showHistorySheet,
+                                onPressed: _history.isEmpty
+                                    ? null
+                                    : _showHistorySheet,
                                 icon: const Icon(Icons.history_rounded),
                               ),
                               const SizedBox(width: 8),
@@ -667,7 +695,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                           Text(
                             'Preview, confidence score, detected features, and saved history all stay in one place.',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.68,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -702,7 +732,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                 ? 'UV Assist expects an external UV lamp. Phone flash is switched off so fluorescence patterns stay visible.'
                                 : 'Standard mode prioritizes OCR, visible print, and stricter image-quality checks.',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.68,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -712,8 +744,12 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                               borderRadius: BorderRadius.circular(24),
                               gradient: LinearGradient(
                                 colors: [
-                                  theme.colorScheme.primary.withValues(alpha: 0.14),
-                                  theme.colorScheme.secondary.withValues(alpha: 0.12),
+                                  theme.colorScheme.primary.withValues(
+                                    alpha: 0.14,
+                                  ),
+                                  theme.colorScheme.secondary.withValues(
+                                    alpha: 0.12,
+                                  ),
                                 ],
                               ),
                             ),
@@ -723,7 +759,8 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                 Text(
                                   _isBusy
                                       ? 'Scan in progress'
-                                      : result?.confidenceLabel ?? 'Waiting for first scan',
+                                      : result?.confidenceLabel ??
+                                            'Waiting for first scan',
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -743,7 +780,10 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                             const SizedBox(height: 14),
                             Row(
                               children: [
-                                _HistoryThumb(path: _lastCapturePath!, size: 88),
+                                _HistoryThumb(
+                                  path: _lastCapturePath!,
+                                  size: 88,
+                                ),
                                 if (result != null) ...[
                                   const SizedBox(width: 12),
                                   _HistoryThumb(
@@ -761,7 +801,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                               borderRadius: BorderRadius.circular(26),
                               gradient: LinearGradient(
                                 colors: [
-                                  _toneForResult(result?.verdict).withValues(alpha: 0.16),
+                                  _toneForResult(
+                                    result?.verdict,
+                                  ).withValues(alpha: 0.16),
                                   theme.colorScheme.surface,
                                 ],
                               ),
@@ -771,13 +813,15 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                     'No result yet. Capture a note to get preview, confidence %, OCR text, and history.',
                                   )
                                 : Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Result: ${result.verdict}',
-                                        style: theme.textTheme.headlineSmall?.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                        ),
+                                        style: theme.textTheme.headlineSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w800,
+                                            ),
                                       ),
                                       const SizedBox(height: 10),
                                       Text(result.summary),
@@ -786,9 +830,17 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                         spacing: 10,
                                         runSpacing: 10,
                                         children: [
-                                          Chip(label: Text(result.confidenceLabel)),
-                                          Chip(label: Text(result.inspectionMode.label)),
-                                          Chip(label: Text(result.detectionMode)),
+                                          Chip(
+                                            label: Text(result.confidenceLabel),
+                                          ),
+                                          Chip(
+                                            label: Text(
+                                              result.inspectionMode.label,
+                                            ),
+                                          ),
+                                          Chip(
+                                            label: Text(result.detectionMode),
+                                          ),
                                           Chip(
                                             label: Text(
                                               'Light ${(result.quality.lighting * 100).round()}%',
@@ -822,8 +874,8 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                 child: FilledButton.icon(
                                   onPressed: permissionGranted
                                       ? (_isCameraReady && !_isBusy
-                                          ? _captureAndAnalyze
-                                          : null)
+                                            ? _captureAndAnalyze
+                                            : null)
                                       : _ensurePermissionAndStartCamera,
                                   icon: Icon(
                                     permissionGranted
@@ -832,7 +884,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                   ),
                                   label: Text(
                                     permissionGranted
-                                        ? (_isBusy ? 'Scanning...' : 'Scan Note')
+                                        ? (_isBusy
+                                              ? 'Scanning...'
+                                              : 'Scan Note')
                                         : 'Grant Camera',
                                   ),
                                 ),
@@ -840,7 +894,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                               const SizedBox(width: 12),
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed: _history.isEmpty ? null : _showHistorySheet,
+                                  onPressed: _history.isEmpty
+                                      ? null
+                                      : _showHistorySheet,
                                   icon: const Icon(Icons.history_rounded),
                                   label: const Text('View History'),
                                 ),
@@ -862,10 +918,14 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                           else
                             Column(
                               children: result.detectedFeatures
-                                  .map((feature) => Padding(
-                                        padding: const EdgeInsets.only(bottom: 10),
-                                        child: _FeatureTile(feature: feature),
-                                      ))
+                                  .map(
+                                    (feature) => Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 10,
+                                      ),
+                                      child: _FeatureTile(feature: feature),
+                                    ),
+                                  )
                                   .toList(),
                             ),
                           const SizedBox(height: 18),
@@ -895,7 +955,8 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                     onTap: () {
                                       setState(() {
                                         _latestResult = item;
-                                        _lastCapturePath = item.capturedImagePath;
+                                        _lastCapturePath =
+                                            item.capturedImagePath;
                                         _inspectionMode = item.inspectionMode;
                                         _status = 'Loaded from history';
                                         _helperText =
@@ -906,7 +967,9 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                       width: 182,
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        color: theme.colorScheme.surfaceContainerHighest
+                                        color: theme
+                                            .colorScheme
+                                            .surfaceContainerHighest
                                             .withValues(alpha: 0.28),
                                         borderRadius: BorderRadius.circular(22),
                                       ),
@@ -919,17 +982,20 @@ class _NoteScannerHomeState extends State<NoteScannerHome>
                                           const SizedBox(width: 10),
                                           Expanded(
                                             child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   item.verdict,
                                                   maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   item.confidenceLabel,
-                                                  style: theme.textTheme.bodySmall,
+                                                  style:
+                                                      theme.textTheme.bodySmall,
                                                 ),
                                               ],
                                             ),
@@ -996,7 +1062,9 @@ class _FeatureTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tone = feature.passed ? const Color(0xFF118B57) : const Color(0xFFC56F1F);
+    final tone = feature.passed
+        ? const Color(0xFF118B57)
+        : const Color(0xFFC56F1F);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1006,13 +1074,19 @@ class _FeatureTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(feature.passed ? Icons.check_circle : Icons.info_outline, color: tone),
+          Icon(
+            feature.passed ? Icons.check_circle : Icons.info_outline,
+            color: tone,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(feature.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  feature.title,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
                 const SizedBox(height: 4),
                 Text(feature.detail),
               ],
@@ -1094,10 +1168,7 @@ class _FramePainter extends CustomPainter {
 }
 
 class _ScanLinePainter extends CustomPainter {
-  _ScanLinePainter({
-    required this.progress,
-    required this.isActive,
-  });
+  _ScanLinePainter({required this.progress, required this.isActive});
 
   final double progress;
   final bool isActive;
