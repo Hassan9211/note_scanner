@@ -14,10 +14,7 @@ import 'scan_models.dart';
 typedef ScanProgressCallback = void Function(ScanProgress progress);
 
 class ScanHistoryStore {
-  ScanHistoryStore._({
-    required this.preferences,
-    required this.rootDirectory,
-  });
+  ScanHistoryStore._({required this.preferences, required this.rootDirectory});
 
   static const _historyKey = 'note_scan_history_v2';
 
@@ -61,9 +58,8 @@ class ScanHistoryStore {
       final decoded = jsonDecode(raw) as List<dynamic>;
       return decoded
           .map(
-            (item) => NoteScanResult.fromJson(
-              Map<String, dynamic>.from(item as Map),
-            ),
+            (item) =>
+                NoteScanResult.fromJson(Map<String, dynamic>.from(item as Map)),
           )
           .toList();
     } catch (_) {
@@ -118,9 +114,9 @@ class ScanHistoryStore {
 
 class NoteScanAnalyzer {
   NoteScanAnalyzer()
-      : _textRecognizer = Platform.isAndroid || Platform.isIOS
-            ? TextRecognizer(script: TextRecognitionScript.latin)
-            : null;
+    : _textRecognizer = Platform.isAndroid || Platform.isIOS
+          ? TextRecognizer(script: TextRecognitionScript.latin)
+          : null;
 
   final TextRecognizer? _textRecognizer;
 
@@ -191,9 +187,9 @@ class NoteScanAnalyzer {
       File(imagePath).parent.path,
       'crop_${p.basenameWithoutExtension(imagePath)}.jpg',
     );
-    await File(processedImagePath).writeAsBytes(
-      img.encodeJpg(processed, quality: 90),
-    );
+    await File(
+      processedImagePath,
+    ).writeAsBytes(img.encodeJpg(processed, quality: 90));
 
     onProgress?.call(
       ScanProgress(
@@ -248,32 +244,26 @@ class NoteScanAnalyzer {
     );
 
     final normalizedText = ocrData.text.toLowerCase().replaceAll('\n', ' ');
-    final hasAuthorityKeyword = _containsAny(
-      normalizedText,
-      const [
-        'bank',
-        'reserve bank',
-        'state bank',
-        'central bank',
-        'federal reserve',
-      ],
-    );
-    final hasCurrencyKeyword = _containsAny(
-      normalizedText,
-      const [
-        'rupees',
-        'rupee',
-        'dollars',
-        'dollar',
-        'pkr',
-        'usd',
-        'inr',
-        'eur',
-        'pounds',
-        'currency',
-        'note',
-      ],
-    );
+    final hasAuthorityKeyword = _containsAny(normalizedText, const [
+      'bank',
+      'reserve bank',
+      'state bank',
+      'central bank',
+      'federal reserve',
+    ]);
+    final hasCurrencyKeyword = _containsAny(normalizedText, const [
+      'rupees',
+      'rupee',
+      'dollars',
+      'dollar',
+      'pkr',
+      'usd',
+      'inr',
+      'eur',
+      'pounds',
+      'currency',
+      'note',
+    ]);
     final hasDenomination = RegExp(
       r'\b(5|10|20|50|100|200|500|1000|2000|5000)\b',
     ).hasMatch(normalizedText);
@@ -290,11 +280,13 @@ class NoteScanAnalyzer {
 
     if (mode == ScanInspectionMode.uv) {
       final uvMetrics = uvSignals ?? const _UvSignalMetrics.fallback();
-      final visibleCuePassed = hasReadableText ||
+      final visibleCuePassed =
+          hasReadableText ||
           hasAuthorityKeyword ||
           hasCurrencyCue ||
           hasSerialPattern;
-      final captureQuality = (quality.contrast * 0.36) +
+      final captureQuality =
+          (quality.contrast * 0.36) +
           (quality.sharpness * 0.36) +
           (uvMetrics.darkField * 0.28);
       final passedSignalCount = <bool>[
@@ -306,7 +298,8 @@ class NoteScanAnalyzer {
         !uvMetrics.overglow,
         visibleCuePassed,
       ].where((value) => value).length;
-      final uvSecurityGatePassed = uvMetrics.response >= 0.68 &&
+      final uvSecurityGatePassed =
+          uvMetrics.response >= 0.68 &&
           uvMetrics.darkField >= 0.56 &&
           uvMetrics.patternBalance >= 0.56 &&
           !uvMetrics.overglow &&
@@ -417,7 +410,8 @@ class NoteScanAnalyzer {
       hasCurrencyCue,
       hasSerialPattern,
     ].where((value) => value).length;
-    final highSecurityGatePassed = hasReadableText &&
+    final highSecurityGatePassed =
+        hasReadableText &&
         hasAuthorityKeyword &&
         hasCurrencyCue &&
         hasSerialPattern &&
@@ -586,8 +580,8 @@ class NoteScanAnalyzer {
         title: 'Readable note text',
         detail: ocrAvailable
             ? (hasReadableText
-                ? 'OCR found enough printed characters to trust the read more.'
-                : 'OCR ran, but it could not read enough text.')
+                  ? 'OCR found enough printed characters to trust the read more.'
+                  : 'OCR ran, but it could not read enough text.')
             : 'OCR is unavailable on this platform, so only image checks ran.',
         passed: hasReadableText,
       ),
@@ -661,7 +655,9 @@ class NoteScanAnalyzer {
       warnings.add('Try brighter, more even light or switch the flash on.');
     }
     if (quality.sharpness < 0.42) {
-      warnings.add('Hold the phone steady and keep the note flat inside the frame.');
+      warnings.add(
+        'Hold the phone steady and keep the note flat inside the frame.',
+      );
     }
     if (verdict == 'Likely Fake') {
       warnings.add(
@@ -756,8 +752,8 @@ class NoteScanAnalyzer {
         title: 'Visible print cross-check',
         detail: ocrAvailable
             ? (visibleCuePassed
-                ? 'Visible print or serial cues supported the UV pass.'
-                : 'UV glow appeared without enough visible print support.')
+                  ? 'Visible print or serial cues supported the UV pass.'
+                  : 'UV glow appeared without enough visible print support.')
             : 'OCR support is unavailable here, so UV confidence stays more conservative.',
         passed: visibleCuePassed,
       ),
@@ -859,9 +855,10 @@ class NoteScanAnalyzer {
           .round(),
     );
     final left = ((image.width - width) / 2).round().clamp(0, image.width - 1);
-    final top = ((image.height - height) / 2)
-        .round()
-        .clamp(0, image.height - 1);
+    final top = ((image.height - height) / 2).round().clamp(
+      0,
+      image.height - 1,
+    );
 
     return _CropBox(
       left: left,
@@ -903,8 +900,10 @@ class NoteScanAnalyzer {
     }
 
     final mean = total / math.max(1, samples);
-    final variance =
-        math.max(0, (totalSquared / math.max(1, samples)) - (mean * mean));
+    final variance = math.max(
+      0,
+      (totalSquared / math.max(1, samples)) - (mean * mean),
+    );
     final deviation = math.sqrt(variance);
     final lighting = (1 - ((mean - 145).abs() / 145)).clamp(0.0, 1.0);
     final contrast = (deviation / 64).clamp(0.0, 1.0);
@@ -961,30 +960,35 @@ class NoteScanAnalyzer {
 
     final hotspotCoverage = hotspotCount / math.max(1, samples);
     final darkField = (darkCount / math.max(1, samples)).clamp(0.0, 1.0);
-    final tintStrength =
-        (tintedHotspotCount / math.max(1, hotspotCount)).clamp(0.0, 1.0);
+    final tintStrength = (tintedHotspotCount / math.max(1, hotspotCount)).clamp(
+      0.0,
+      1.0,
+    );
     final hotspotMean = hotspotCount == 0
         ? 0.0
         : hotspotLuminanceTotal / hotspotCount;
     final backgroundMean = backgroundCount == 0
         ? 0.0
         : backgroundLuminanceTotal / backgroundCount;
-    final contrastGap =
-        ((hotspotMean - backgroundMean) / 0.55).clamp(0.0, 1.0);
-    final coverageScore =
-        (1 - ((hotspotCoverage - 0.08).abs() / 0.08)).clamp(0.0, 1.0);
+    final contrastGap = ((hotspotMean - backgroundMean) / 0.55).clamp(0.0, 1.0);
+    final coverageScore = (1 - ((hotspotCoverage - 0.08).abs() / 0.08)).clamp(
+      0.0,
+      1.0,
+    );
     final darkFieldScore = (darkField / 0.6).clamp(0.0, 1.0);
     final patternBalance =
         ((coverageScore * 0.55) + (contrastGap * 0.25) + (tintStrength * 0.2))
             .clamp(0.0, 1.0);
-    final overglow = hotspotCoverage > 0.24 ||
+    final overglow =
+        hotspotCoverage > 0.24 ||
         (hotspotCoverage > 0.16 && darkField < 0.3) ||
         backgroundMean > 0.58;
-    final response = ((contrastGap * 0.4) +
-            (coverageScore * 0.25) +
-            (tintStrength * 0.2) +
-            (darkFieldScore * 0.15))
-        .clamp(0.0, 1.0);
+    final response =
+        ((contrastGap * 0.4) +
+                (coverageScore * 0.25) +
+                (tintStrength * 0.2) +
+                (darkFieldScore * 0.15))
+            .clamp(0.0, 1.0);
 
     return _UvSignalMetrics(
       response: response,
@@ -1009,10 +1013,7 @@ class NoteScanAnalyzer {
     try {
       final inputImage = InputImage.fromFilePath(processedImagePath);
       final recognized = await recognizer.processImage(inputImage);
-      return _OcrData(
-        text: recognized.text.trim(),
-        available: true,
-      );
+      return _OcrData(text: recognized.text.trim(), available: true);
     } on MissingPluginException {
       return const _OcrData(
         text: '',
@@ -1064,11 +1065,7 @@ class _CropBox {
 }
 
 class _OcrData {
-  const _OcrData({
-    required this.text,
-    required this.available,
-    this.warning,
-  });
+  const _OcrData({required this.text, required this.available, this.warning});
 
   final String text;
   final bool available;
@@ -1085,11 +1082,11 @@ class _UvSignalMetrics {
   });
 
   const _UvSignalMetrics.fallback()
-      : response = 0,
-        darkField = 0,
-        patternBalance = 0,
-        hotspotCoverage = 0,
-        overglow = false;
+    : response = 0,
+      darkField = 0,
+      patternBalance = 0,
+      hotspotCoverage = 0,
+      overglow = false;
 
   final double response;
   final double darkField;
